@@ -1,0 +1,1528 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Graffs Workstream Dashboard</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --fg: #000;
+      --border: #e5e5e7;
+      --secondary: #666;
+      --accent: #007AFF;
+      --success: #34C759;
+      --separator: #e5e5e7;
+      --section-bg: #fff;
+      --hover: #f5f5f5;
+      --tag-bg: #f0f0f0;
+      --danger: #ff3b30;
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1c1c1e;
+        --fg: #fff;
+        --border: #424245;
+        --secondary: #999;
+        --accent: #0a84ff;
+        --success: #30b0c0;
+        --separator: #424245;
+        --section-bg: #2c2c2e;
+        --hover: #3a3a3c;
+        --tag-bg: #3a3a3c;
+        --danger: #ff453a;
+        color-scheme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #1c1c1e;
+      --fg: #fff;
+      --border: #424245;
+      --secondary: #999;
+      --accent: #0a84ff;
+      --success: #30b0c0;
+      --separator: #424245;
+      --section-bg: #2c2c2e;
+      --hover: #3a3a3c;
+      --tag-bg: #3a3a3c;
+      --danger: #ff453a;
+      color-scheme: dark;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+      padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+      padding-inline: 16px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-block: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--separator);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .sync-status {
+      font-size: 12px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary);
+    }
+
+    .sync-indicator.online {
+      background: var(--success);
+    }
+
+    .theme-toggle {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--separator);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      font-size: 15px;
+      color: var(--secondary);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab:hover {
+      color: var(--fg);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      margin-bottom: 24px;
+      max-width: 900px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .btn-add {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-add:hover {
+      opacity: 0.9;
+    }
+
+    .table-container {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .table-wrapper {
+      display: inline-block;
+      min-width: 100%;
+    }
+
+    .table-row {
+      display: grid;
+      gap: 0;
+      border-bottom: 1px solid var(--separator);
+      align-items: start;
+      position: relative;
+    }
+
+    .table-row.pipeline {
+      grid-template-columns: 1.2fr 1fr 0.75fr 1fr 1.2fr 2fr 2fr 1.5fr 40px;
+    }
+
+    .table-row.workstream {
+      grid-template-columns: 1.5fr 0.6fr 0.75fr 0.7fr 2.5fr 2fr 40px;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .table-row.header {
+      background: var(--hover);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--secondary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table-row:hover:not(.header) {
+      background: var(--hover);
+    }
+
+    .table-cell {
+      padding: 8px 12px;
+      border-right: 1px solid var(--separator);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: auto;
+    }
+
+    .table-cell:last-child {
+      border-right: none;
+    }
+
+    .table-row.header .table-cell {
+      padding: 8px 12px;
+    }
+
+    .editable-cell {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .editable-cell:hover {
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .editable-cell.editing {
+      background: rgba(0, 122, 255, 0.1);
+    }
+
+    .cell-input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--section-bg);
+      color: var(--fg);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 8px 12px;
+      line-height: 1.4;
+      resize: vertical;
+    }
+
+    .cell-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+    }
+
+    .cell-company {
+      font-weight: 600;
+      color: var(--fg);
+      font-size: 15px;
+    }
+
+    .cell-secondary {
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .cell-summary {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--fg);
+      overflow: visible;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .cell-action {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--secondary);
+      overflow: visible;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .industry-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .industry-tag.fleet {
+      background: rgba(0, 122, 255, 0.15);
+      color: #0066cc;
+    }
+
+    .industry-tag.pharma {
+      background: rgba(147, 51, 234, 0.15);
+      color: #7c3aed;
+    }
+
+    .industry-tag.ops {
+      background: rgba(34, 197, 94, 0.15);
+      color: #16a34a;
+    }
+
+    .btn-delete {
+      background: transparent;
+      color: var(--secondary);
+      border: none;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: auto;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .btn-delete:hover {
+      opacity: 0.8;
+      color: var(--danger);
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .tasks-section {
+      margin-bottom: 24px;
+    }
+
+    .tasks-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--fg);
+    }
+
+    .tasks-table-header {
+      display: grid;
+      grid-template-columns: 30px 2.5fr 1.5fr 1fr 1.1fr 1.1fr 1.1fr 40px;
+      gap: 0;
+      background: var(--hover);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--secondary);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--separator);
+      margin-bottom: 0;
+    }
+
+    .tasks-table-header-cell {
+      padding: 12px 12px;
+      border-right: 1px solid var(--separator);
+    }
+
+    .tasks-table-header-cell:last-child {
+      border-right: none;
+    }
+
+    .task-item {
+      background: var(--section-bg);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--separator);
+      padding: 0;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 30px 2.5fr 1.5fr 1fr 1.1fr 1.1fr 1.1fr 40px;
+      gap: 0;
+      align-items: center;
+    }
+
+    .task-item:last-child {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task-item:hover {
+      background: var(--hover);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent);
+      margin: 0 auto;
+      flex-shrink: 0;
+      padding: 12px;
+    }
+
+    .task-cell {
+      padding: 8px 10px;
+      border-right: 1px solid var(--separator);
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      min-height: auto;
+    }
+
+    .task-cell:last-child {
+      border-right: none;
+    }
+
+    .task-text {
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.4;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .task-text:hover {
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--secondary);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--section-bg);
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--secondary);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--section-bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+      background: var(--hover);
+    }
+
+    .summary-count {
+      font-size: 24px;
+      font-weight: 300;
+      color: var(--fg);
+      margin-bottom: 24px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 24px;
+      color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Graffs Workstream Dashboard</h1>
+        <div class="sync-status">
+          <div class="sync-indicator" id="syncIndicator"></div>
+          <span id="syncText">Connecting...</span>
+        </div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab" onclick="switchTab('workstreams')">Workstreams</button>
+      <button class="tab" onclick="switchTab('tasks')">Tasks</button>
+      <button class="tab" onclick="switchTab('sales')">Sales Pipeline</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content active">
+      <div class="section">
+        <div class="section-title">Dashboard Summary</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+          <div>
+            <div class="cell-secondary" style="margin-bottom: 8px;">Total Pipeline Accounts</div>
+            <div class="summary-count" id="pipelineCount">—</div>
+          </div>
+          <div>
+            <div class="cell-secondary" style="margin-bottom: 8px;">Active Workstreams</div>
+            <div class="summary-count" id="workstreamCount">—</div>
+          </div>
+          <div>
+            <div class="cell-secondary" style="margin-bottom: 8px;">Total Tasks</div>
+            <div class="summary-count" id="taskCount">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workstreams Tab -->
+    <div id="workstreams" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Active Workstreams</div>
+          <button class="btn-add" onclick="openAddWorkstreamModal()">+ Add Workstream</button>
+        </div>
+        <div class="table-container">
+          <div class="table-wrapper">
+            <div class="table-row workstream header">
+              <div class="table-cell">Workstream</div>
+              <div class="table-cell">Industry</div>
+              <div class="table-cell">Status</div>
+              <div class="table-cell">Owner</div>
+              <div class="table-cell">Summary</div>
+              <div class="table-cell">Action Needed</div>
+              <div class="table-cell"></div>
+            </div>
+            <div id="workstreamsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Tab -->
+    <div id="tasks" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <button class="btn-add" onclick="openAddTaskModal()">+ Add Task</button>
+        </div>
+        <div id="tasksContainer"></div>
+      </div>
+    </div>
+
+    <!-- Sales Pipeline Tab -->
+    <div id="sales" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Sales Pipeline</div>
+          <button class="btn-add" onclick="openAddPipelineModal()">+ Add Account</button>
+        </div>
+        <div class="table-container">
+          <div class="table-wrapper">
+            <div class="table-row pipeline header">
+              <div class="table-cell">Company</div>
+              <div class="table-cell">Industry</div>
+              <div class="table-cell">Status</div>
+              <div class="table-cell">Owner</div>
+              <div class="table-cell">Last Contact</div>
+              <div class="table-cell">Latest Update</div>
+              <div class="table-cell">Next Step</div>
+              <div class="table-cell">Notes</div>
+              <div class="table-cell"></div>
+            </div>
+            <div id="pipelineList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Workstream Modal -->
+  <div id="addWorkstreamModal" class="modal">
+    <div class="modal-content">
+      <h2>Add Workstream</h2>
+      <div class="form-group">
+        <label>Workstream Name</label>
+        <input type="text" id="wsName" placeholder="e.g., Viatec">
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <input type="text" id="wsIndustry" placeholder="e.g., Fleet">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="wsStatus">
+          <option>Active</option>
+          <option>Scoping</option>
+          <option>On Hold</option>
+          <option>Stalled</option>
+          <option>Complete</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Owner</label>
+        <input type="text" id="wsOwner" placeholder="e.g., Hannah">
+      </div>
+      <div class="form-group">
+        <label>Summary</label>
+        <textarea id="wsSummary" placeholder="Current status and progress..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Action Needed</label>
+        <textarea id="wsAction" placeholder="Next steps..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('addWorkstreamModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveNewWorkstream()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Pipeline Modal -->
+  <div id="addPipelineModal" class="modal">
+    <div class="modal-content">
+      <h2>Add Account</h2>
+      <div class="form-group">
+        <label>Company</label>
+        <input type="text" id="pCompany" placeholder="Company name">
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <input type="text" id="pIndustry" placeholder="e.g., Fleet, Pharma">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <input type="text" id="pStatus" placeholder="e.g., Active, Prospect">
+      </div>
+      <div class="form-group">
+        <label>Owner</label>
+        <input type="text" id="pOwner" placeholder="e.g., Ben">
+      </div>
+      <div class="form-group">
+        <label>Last Contact</label>
+        <input type="text" id="pLastContact" placeholder="MM/DD/YYYY">
+      </div>
+      <div class="form-group">
+        <label>Latest Update</label>
+        <textarea id="pLatestUpdate" placeholder="Recent activity..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Next Step</label>
+        <textarea id="pNextStep" placeholder="What's needed..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="pNotes" placeholder="Additional notes..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('addPipelineModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveNewPipeline()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Task Modal -->
+  <div id="addTaskModal" class="modal">
+    <div class="modal-content">
+      <h2>Add Task</h2>
+      <div class="form-group">
+        <label>Task Description</label>
+        <textarea id="tText" placeholder="What needs to be done..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Workstream</label>
+        <input type="text" id="tWorkstream" placeholder="e.g., Sales Pipeline">
+      </div>
+      <div class="form-group">
+        <label>Owner</label>
+        <input type="text" id="tOwner" placeholder="e.g., Ben">
+      </div>
+      <div class="form-group">
+        <label>Open Date</label>
+        <input type="text" id="tOpenDate" placeholder="MM/DD/YYYY">
+      </div>
+      <div class="form-group">
+        <label>Target Date</label>
+        <input type="text" id="tTargetDate" placeholder="MM/DD/YYYY">
+      </div>
+      <div class="form-group">
+        <label>Assign to Me</label>
+        <input type="checkbox" id="tIsMyTask" style="width: auto;">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('addTaskModal')">Cancel</button>
+        <button class="btn-primary" onclick="saveNewTask()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.js"></script>
+  <script>
+    // Supabase configuration
+    const SUPABASE_URL = 'https://xnmrnqbsfadxrtlubrrd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_r9sOQ-xcEmGE_XyDkL5e9w_j9dM5kuF';
+
+    let supabase = null;
+    let dashboardData = {
+      pipeline: [],
+      workstreams: [],
+      tasks: []
+    };
+
+    // Initialize Supabase
+    async function initSupabase() {
+      try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✓ Supabase client initialized');
+        updateSyncStatus(true);
+
+        // Check if migration is needed
+        const hasLocalData = localStorage.getItem('graffs-dashboard-data');
+        if (hasLocalData) {
+          const migrated = await migrateLocalDataToSupabase();
+          if (migrated) {
+            console.log('✓ Migration successful, data is now in Supabase');
+          }
+        } else {
+          // No local data, just load from Supabase
+          await loadDataFromSupabase();
+        }
+      } catch (error) {
+        console.error('✗ Error initializing Supabase:', error);
+        updateSyncStatus(false);
+        loadLocalData();
+      }
+    }
+
+    async function loadDataFromSupabase() {
+      try {
+        // Load pipeline
+        const { data: pipelineData, error: pipelineError } = await supabase
+          .from('pipeline')
+          .select('*');
+
+        if (pipelineError) throw pipelineError;
+        dashboardData.pipeline = pipelineData || [];
+
+        // Load workstreams
+        const { data: workstreamsData, error: workstreamsError } = await supabase
+          .from('workstreams')
+          .select('*');
+
+        if (workstreamsError) throw workstreamsError;
+        dashboardData.workstreams = workstreamsData || [];
+
+        // Load tasks
+        const { data: tasksData, error: tasksError } = await supabase
+          .from('tasks')
+          .select('*');
+
+        if (tasksError) throw tasksError;
+        dashboardData.tasks = tasksData || [];
+
+        console.log('✓ Loaded data from Supabase');
+        updateCounts();
+        renderPipeline();
+        renderWorkstreams();
+        renderTasks();
+      } catch (error) {
+        console.error('Error loading from Supabase:', error);
+        loadLocalData();
+      }
+    }
+
+    function loadLocalData() {
+      try {
+        const saved = localStorage.getItem('graffs-dashboard-data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          dashboardData = parsed;
+          console.log('✓ Loaded data from localStorage');
+          updateCounts();
+          renderPipeline();
+          renderWorkstreams();
+          renderTasks();
+        }
+      } catch (error) {
+        console.error('Error loading from localStorage:', error);
+      }
+    }
+
+    async function migrateLocalDataToSupabase() {
+      try {
+        const saved = localStorage.getItem('graffs-dashboard-data');
+        if (!saved) {
+          console.log('No localStorage data to migrate');
+          return false;
+        }
+
+        const localData = JSON.parse(saved);
+        console.log('🔄 Starting data migration from localStorage to Supabase...');
+        console.log('📊 Found in localStorage:', {
+          pipeline: localData.pipeline?.length || 0,
+          workstreams: localData.workstreams?.length || 0,
+          tasks: localData.tasks?.length || 0
+        });
+        updateSyncStatus(true, 'Migrating data...');
+
+        // Check if Supabase tables are empty - use count() properly
+        const { count: pipelineCount, error: pipelineCountError } = await supabase
+          .from('pipeline')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: workstreamsCount, error: workstreamsCountError } = await supabase
+          .from('workstreams')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: tasksCount, error: tasksCountError } = await supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true });
+
+        console.log('📈 Supabase table counts:', {
+          pipeline: pipelineCount || 0,
+          workstreams: workstreamsCount || 0,
+          tasks: tasksCount || 0
+        });
+
+        const hasExistingData = (pipelineCount > 0) || (workstreamsCount > 0) || (tasksCount > 0);
+        if (hasExistingData) {
+          console.log('Supabase tables already have data, skipping migration');
+          return false;
+        }
+
+        let migratedCount = 0;
+
+        // Migrate pipeline data
+        if (localData.pipeline && localData.pipeline.length > 0) {
+          console.log(`Migrating ${localData.pipeline.length} pipeline accounts...`);
+          for (let i = 0; i < localData.pipeline.length; i++) {
+            const item = localData.pipeline[i];
+            const { id, ...dataWithoutId } = item;
+            const { error } = await supabase.from('pipeline').insert([dataWithoutId]);
+            if (error) {
+              console.error(`  ❌ Error inserting pipeline item ${i}:`, error);
+            } else {
+              migratedCount++;
+            }
+          }
+          console.log(`  ✓ Migrated ${migratedCount} pipeline accounts`);
+        }
+
+        // Migrate workstreams data
+        migratedCount = 0;
+        if (localData.workstreams && localData.workstreams.length > 0) {
+          console.log(`Migrating ${localData.workstreams.length} workstreams...`);
+          for (let i = 0; i < localData.workstreams.length; i++) {
+            const item = localData.workstreams[i];
+            const { id, ...dataWithoutId } = item;
+            const { error } = await supabase.from('workstreams').insert([dataWithoutId]);
+            if (error) {
+              console.error(`  ❌ Error inserting workstream ${i}:`, error);
+            } else {
+              migratedCount++;
+            }
+          }
+          console.log(`  ✓ Migrated ${migratedCount} workstreams`);
+        }
+
+        // Migrate tasks data
+        migratedCount = 0;
+        if (localData.tasks && localData.tasks.length > 0) {
+          console.log(`Migrating ${localData.tasks.length} tasks...`);
+          for (let i = 0; i < localData.tasks.length; i++) {
+            const item = localData.tasks[i];
+            const { id, ...dataWithoutId } = item;
+            const { error } = await supabase.from('tasks').insert([dataWithoutId]);
+            if (error) {
+              console.error(`  ❌ Error inserting task ${i}:`, error);
+            } else {
+              migratedCount++;
+            }
+          }
+          console.log(`  ✓ Migrated ${migratedCount} tasks`);
+        }
+
+        console.log('✓ Migration complete!');
+        // Reload data from Supabase after migration
+        await loadDataFromSupabase();
+        return true;
+      } catch (error) {
+        console.error('❌ Migration error:', error);
+        return false;
+      }
+    }
+
+    function updateSyncStatus(online, customText) {
+      const indicator = document.getElementById('syncIndicator');
+      const text = document.getElementById('syncText');
+
+      if (customText) {
+        text.textContent = customText;
+        indicator.classList.add('online');
+      } else if (online) {
+        indicator.classList.add('online');
+        text.textContent = 'Synced with Supabase';
+      } else {
+        indicator.classList.remove('online');
+        text.textContent = 'Using localStorage (offline)';
+      }
+    }
+
+    async function savePipeline(item) {
+      try {
+        if (item.id) {
+          const { error } = await supabase
+            .from('pipeline')
+            .update(item)
+            .eq('id', item.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('pipeline')
+            .insert([item]);
+          if (error) throw error;
+        }
+        return true;
+      } catch (error) {
+        console.error('Error saving pipeline:', error);
+        return false;
+      }
+    }
+
+    async function saveWorkstream(item) {
+      try {
+        if (item.id) {
+          const { error } = await supabase
+            .from('workstreams')
+            .update(item)
+            .eq('id', item.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('workstreams')
+            .insert([item]);
+          if (error) throw error;
+        }
+        return true;
+      } catch (error) {
+        console.error('Error saving workstream:', error);
+        return false;
+      }
+    }
+
+    async function saveTask(item) {
+      try {
+        if (item.id) {
+          const { error } = await supabase
+            .from('tasks')
+            .update(item)
+            .eq('id', item.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('tasks')
+            .insert([item]);
+          if (error) throw error;
+        }
+        return true;
+      } catch (error) {
+        console.error('Error saving task:', error);
+        return false;
+      }
+    }
+
+    // Update counts
+    function updateCounts() {
+      document.getElementById('pipelineCount').textContent = dashboardData.pipeline.length;
+      document.getElementById('workstreamCount').textContent = dashboardData.workstreams.length;
+      document.getElementById('taskCount').textContent = dashboardData.tasks.filter(t => !t.completed).length;
+    }
+
+    // Editable cell function
+    function makeEditable(element, dataObj, field, saveFunc, rerender) {
+      element.addEventListener('click', (e) => {
+        if (element.querySelector('.cell-input')) return;
+
+        e.stopPropagation();
+        const currentValue = dataObj[field];
+        const rect = element.getBoundingClientRect();
+
+        element.innerHTML = '';
+        const input = document.createElement('textarea');
+        input.className = 'cell-input';
+        input.value = currentValue || '';
+        input.style.width = '100%';
+        input.style.minHeight = Math.max(60, rect.height) + 'px';
+        input.style.boxSizing = 'border-box';
+        element.appendChild(input);
+
+        input.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+
+        input.focus();
+
+        async function saveEdit() {
+          const newValue = input.value.trim();
+          dataObj[field] = newValue;
+          await saveFunc(dataObj);
+          rerender();
+        }
+
+        input.addEventListener('blur', saveEdit);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && e.ctrlKey) {
+            saveEdit();
+          }
+        });
+      });
+    }
+
+    // Render pipeline
+    function renderPipeline() {
+      const pipelineList = document.getElementById('pipelineList');
+
+      const getIndustryClass = (industry) => {
+        if (!industry) return '';
+        if (industry.toLowerCase() === 'fleet') return 'fleet';
+        if (industry.toLowerCase() === 'pharma') return 'pharma';
+        if (industry.toLowerCase().includes('ops')) return 'ops';
+        return '';
+      };
+
+      pipelineList.innerHTML = dashboardData.pipeline.map((item, idx) => `
+        <div class="table-row pipeline">
+          <div class="table-cell">
+            <div class="cell-company editable-cell" data-idx="${idx}" data-field="company">${item.company}</div>
+          </div>
+          <div class="table-cell">
+            <div class="editable-cell" data-idx="${idx}" data-field="industry">
+              ${item.industry ? `<span class="industry-tag ${getIndustryClass(item.industry)}">${item.industry}</span>` : '—'}
+            </div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="status">${item.status || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="owner">${item.owner || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="lastContact">${item.lastContact || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-summary editable-cell" data-idx="${idx}" data-field="latestUpdate">${item.latestUpdate || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-action editable-cell" data-idx="${idx}" data-field="nextStep">${item.nextStep || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="notes">${item.notes || '—'}</div>
+          </div>
+          <div class="table-cell" style="justify-content: center;">
+            <button class="btn-delete" onclick="deletePipeline(${idx})">×</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.table-row.pipeline .editable-cell').forEach(cell => {
+        const idx = parseInt(cell.dataset.idx);
+        const field = cell.dataset.field;
+        makeEditable(cell, dashboardData.pipeline[idx], field, savePipeline, renderPipeline);
+      });
+    }
+
+    // Render workstreams
+    function renderWorkstreams() {
+      const list = document.getElementById('workstreamsList');
+
+      const getIndustryClass = (industry) => {
+        if (!industry) return '';
+        if (industry.toLowerCase() === 'fleet') return 'fleet';
+        if (industry.toLowerCase() === 'pharma') return 'pharma';
+        if (industry.toLowerCase().includes('ops')) return 'ops';
+        return '';
+      };
+
+      list.innerHTML = dashboardData.workstreams.map((ws, idx) => `
+        <div class="table-row workstream">
+          <div class="table-cell">
+            <div class="cell-company editable-cell" data-idx="${idx}" data-field="name">${ws.name}</div>
+          </div>
+          <div class="table-cell">
+            <div class="editable-cell" data-idx="${idx}" data-field="industry">
+              ${ws.industry ? `<span class="industry-tag ${getIndustryClass(ws.industry)}">${ws.industry}</span>` : '—'}
+            </div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="status">${ws.status}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-secondary editable-cell" data-idx="${idx}" data-field="owner">${ws.owner}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-summary editable-cell" data-idx="${idx}" data-field="summary">${ws.summary || '—'}</div>
+          </div>
+          <div class="table-cell">
+            <div class="cell-action editable-cell" data-idx="${idx}" data-field="actionNeeded">${ws.actionNeeded || '—'}</div>
+          </div>
+          <div class="table-cell" style="justify-content: center;">
+            <button class="btn-delete" onclick="deleteWorkstream(${idx})">×</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.table-row.workstream .editable-cell').forEach(cell => {
+        const idx = parseInt(cell.dataset.idx);
+        const field = cell.dataset.field;
+        makeEditable(cell, dashboardData.workstreams[idx], field, saveWorkstream, renderWorkstreams);
+      });
+    }
+
+    // Render tasks
+    function renderTasks() {
+      const tasksContainer = document.getElementById('tasksContainer');
+
+      const incompleteTasks = dashboardData.tasks.filter(t => !t.completed);
+
+      const grouped = {};
+      incompleteTasks.forEach(task => {
+        if (!grouped[task.owner]) {
+          grouped[task.owner] = [];
+        }
+        grouped[task.owner].push(task);
+      });
+
+      const owners = Object.keys(grouped).sort((a, b) => {
+        if (a === 'Hannah') return -1;
+        if (b === 'Hannah') return 1;
+        if (a === 'Ben') return -1;
+        if (b === 'Ben') return 1;
+        return a.localeCompare(b);
+      });
+
+      if (incompleteTasks.length === 0) {
+        tasksContainer.innerHTML = '<div style="padding: 16px; color: var(--secondary);">No tasks</div>';
+        return;
+      }
+
+      let html = '';
+      owners.forEach(owner => {
+        const ownerTasks = grouped[owner];
+        const sectionTitle = owner === 'Hannah' ? 'My Tasks' : `${owner}'s Tasks`;
+
+        html += `
+          <div class="tasks-section">
+            <div class="tasks-section-title">${sectionTitle}</div>
+            <div class="tasks-table-header">
+              <div class="tasks-table-header-cell"></div>
+              <div class="tasks-table-header-cell">Task</div>
+              <div class="tasks-table-header-cell">Workstream</div>
+              <div class="tasks-table-header-cell">Owner</div>
+              <div class="tasks-table-header-cell">Open Date</div>
+              <div class="tasks-table-header-cell">Target Date</div>
+              <div class="tasks-table-header-cell">Completed</div>
+              <div class="tasks-table-header-cell"></div>
+            </div>
+            ${ownerTasks.map(task => {
+              const taskIdx = dashboardData.tasks.indexOf(task);
+              return `
+              <div class="task-item ${task.completed ? 'completed' : ''}">
+                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${taskIdx})">
+                <div class="task-cell">
+                  <div class="task-text editable-cell" data-idx="${taskIdx}" data-field="text">${task.text}</div>
+                </div>
+                <div class="task-cell">
+                  <div class="tag workstream editable-cell" data-idx="${taskIdx}" data-field="workstream">${task.workstream}</div>
+                </div>
+                <div class="task-cell">
+                  <div class="cell-secondary editable-cell" data-idx="${taskIdx}" data-field="owner">${task.owner}</div>
+                </div>
+                <div class="task-cell">
+                  <div class="cell-secondary editable-cell" data-idx="${taskIdx}" data-field="openDate">${task.openDate}</div>
+                </div>
+                <div class="task-cell">
+                  <div class="cell-secondary editable-cell" data-idx="${taskIdx}" data-field="targetDate">${task.targetDate}</div>
+                </div>
+                <div class="task-cell">
+                  <span class="cell-secondary">${task.completedDate || '—'}</span>
+                </div>
+                <div class="task-cell" style="justify-content: center;">
+                  <button class="btn-delete" onclick="deleteTask(${taskIdx})">×</button>
+                </div>
+              </div>
+            `;
+            }).join('')}
+          </div>
+        `;
+      });
+
+      tasksContainer.innerHTML = html;
+
+      document.querySelectorAll('.task-item .editable-cell').forEach(cell => {
+        const idx = parseInt(cell.dataset.idx);
+        const field = cell.dataset.field;
+        makeEditable(cell, dashboardData.tasks[idx], field, saveTask, renderTasks);
+      });
+    }
+
+    async function toggleTask(idx) {
+      dashboardData.tasks[idx].completed = !dashboardData.tasks[idx].completed;
+      if (dashboardData.tasks[idx].completed) {
+        dashboardData.tasks[idx].completedDate = new Date().toISOString().split('T')[0];
+      } else {
+        dashboardData.tasks[idx].completedDate = null;
+      }
+      await saveTask(dashboardData.tasks[idx]);
+      renderTasks();
+      updateCounts();
+    }
+
+    async function deletePipeline(idx) {
+      if (confirm('Delete this pipeline entry?')) {
+        const item = dashboardData.pipeline[idx];
+        if (item.id && supabase) {
+          await supabase.from('pipeline').delete().eq('id', item.id);
+        }
+        dashboardData.pipeline.splice(idx, 1);
+        renderPipeline();
+        updateCounts();
+      }
+    }
+
+    async function deleteWorkstream(idx) {
+      if (confirm('Delete this workstream?')) {
+        const item = dashboardData.workstreams[idx];
+        if (item.id && supabase) {
+          await supabase.from('workstreams').delete().eq('id', item.id);
+        }
+        dashboardData.workstreams.splice(idx, 1);
+        renderWorkstreams();
+        updateCounts();
+      }
+    }
+
+    async function deleteTask(idx) {
+      if (confirm('Delete this task?')) {
+        const item = dashboardData.tasks[idx];
+        if (item.id && supabase) {
+          await supabase.from('tasks').delete().eq('id', item.id);
+        }
+        dashboardData.tasks.splice(idx, 1);
+        renderTasks();
+        updateCounts();
+      }
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openAddWorkstreamModal() {
+      openModal('addWorkstreamModal');
+    }
+
+    async function saveNewWorkstream() {
+      const name = document.getElementById('wsName').value.trim();
+      const industry = document.getElementById('wsIndustry').value.trim();
+      const status = document.getElementById('wsStatus').value;
+      const owner = document.getElementById('wsOwner').value.trim();
+      const summary = document.getElementById('wsSummary').value.trim();
+      const actionNeeded = document.getElementById('wsAction').value.trim();
+
+      if (!name || !owner) {
+        alert('Please fill in workstream name and owner');
+        return;
+      }
+
+      const newWorkstream = { name, industry, status, owner, priority: 'Medium', summary, actionNeeded };
+      dashboardData.workstreams.push(newWorkstream);
+      await saveWorkstream(newWorkstream);
+      renderWorkstreams();
+      updateCounts();
+      closeModal('addWorkstreamModal');
+
+      document.getElementById('wsName').value = '';
+      document.getElementById('wsIndustry').value = '';
+      document.getElementById('wsStatus').value = 'Active';
+      document.getElementById('wsOwner').value = '';
+      document.getElementById('wsSummary').value = '';
+      document.getElementById('wsAction').value = '';
+    }
+
+    function openAddPipelineModal() {
+      openModal('addPipelineModal');
+    }
+
+    async function saveNewPipeline() {
+      const company = document.getElementById('pCompany').value.trim();
+      const industry = document.getElementById('pIndustry').value.trim();
+      const status = document.getElementById('pStatus').value.trim();
+      const owner = document.getElementById('pOwner').value.trim();
+      const lastContact = document.getElementById('pLastContact').value.trim();
+      const latestUpdate = document.getElementById('pLatestUpdate').value.trim();
+      const nextStep = document.getElementById('pNextStep').value.trim();
+      const notes = document.getElementById('pNotes').value.trim();
+
+      if (!company || !industry) {
+        alert('Please fill in company and industry');
+        return;
+      }
+
+      const newPipeline = { company, industry, status, owner, lastContact, latestUpdate, nextStep, notes };
+      dashboardData.pipeline.push(newPipeline);
+      await savePipeline(newPipeline);
+      renderPipeline();
+      updateCounts();
+      closeModal('addPipelineModal');
+
+      document.getElementById('pCompany').value = '';
+      document.getElementById('pIndustry').value = '';
+      document.getElementById('pStatus').value = '';
+      document.getElementById('pOwner').value = '';
+      document.getElementById('pLastContact').value = '';
+      document.getElementById('pLatestUpdate').value = '';
+      document.getElementById('pNextStep').value = '';
+      document.getElementById('pNotes').value = '';
+    }
+
+    function openAddTaskModal() {
+      openModal('addTaskModal');
+    }
+
+    async function saveNewTask() {
+      const text = document.getElementById('tText').value.trim();
+      const workstream = document.getElementById('tWorkstream').value.trim();
+      let owner = document.getElementById('tOwner').value.trim();
+      const openDate = document.getElementById('tOpenDate').value.trim();
+      const targetDate = document.getElementById('tTargetDate').value.trim();
+      const isMyTask = document.getElementById('tIsMyTask').checked;
+
+      if (isMyTask) {
+        owner = 'Hannah';
+      }
+
+      if (!text || !owner) {
+        alert('Please fill in task description and owner');
+        return;
+      }
+
+      const newTask = { text, workstream, owner, openDate, targetDate, isMyTask, completed: false, completedDate: null };
+      dashboardData.tasks.push(newTask);
+      await saveTask(newTask);
+      renderTasks();
+      updateCounts();
+      closeModal('addTaskModal');
+
+      document.getElementById('tText').value = '';
+      document.getElementById('tWorkstream').value = '';
+      document.getElementById('tOwner').value = '';
+      document.getElementById('tOpenDate').value = '';
+      document.getElementById('tTargetDate').value = '';
+      document.getElementById('tIsMyTask').checked = false;
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(name).classList.add('active');
+      document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      if (current === 'dark') {
+        root.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'system');
+      } else if (current === 'light') {
+        root.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        root.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+      }
+    });
+
+    // Initialize
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      if (savedTheme !== 'system') {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+    }
+
+    initSupabase();
+  </script>
+</body>
+</html>
+
+</body></html>
