@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Graffs Workstream Dashboard</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --fg: #000;
+      --border: #e5e5e7;
+      --secondary: #666;
+      --accent: #007AFF;
+      --success: #34C759;
+      --warning: #ff9500;
+      --danger: #ff3b30;
+      --separator: #e5e5e7;
+      --section-bg: #fff;
+      --hover: #f5f5f5;
+      --tag-bg: #f0f0f0;
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1c1c1e;
+        --fg: #fff;
+        --border: #424245;
+        --secondary: #999;
+        --accent: #0a84ff;
+        --success: #30b0c0;
+        --warning: #ff9500;
+        --danger: #ff453a;
+        --separator: #424245;
+        --section-bg: #2c2c2e;
+        --hover: #3a3a3c;
+        --tag-bg: #3a3a3c;
+        color-scheme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #1c1c1e;
+      --fg: #fff;
+      --border: #424245;
+      --secondary: #999;
+      --accent: #0a84ff;
+      --success: #30b0c0;
+      --warning: #ff9500;
+      --danger: #ff453a;
+      --separator: #424245;
+      --section-bg: #2c2c2e;
+      --hover: #3a3a3c;
+      --tag-bg: #3a3a3c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--fg);
+      padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+      padding-inline: 16px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-block: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--separator);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .sync-status {
+      font-size: 12px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary);
+    }
+
+    .sync-indicator.online {
+      background: var(--success);
+    }
+
+    .theme-toggle {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--separator);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      font-size: 15px;
+      color: var(--secondary);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab:hover {
+      color: var(--fg);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      margin-bottom: 24px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--tag-bg);
+      border-radius: 6px;
+      padding: 4px;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--secondary);
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      background: var(--section-bg);
+      color: var(--fg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ALERTS STYLES */
+    .alert-item {
+      background: var(--hover);
+      border-left: 4px solid var(--warning);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .alert-item.overdue {
+      border-left-color: var(--danger);
+    }
+
+    .alert-item.upcoming {
+      border-left-color: var(--accent);
+    }
+
+    .alert-item.stale {
+      border-left-color: var(--warning);
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--fg);
+    }
+
+    .alert-desc {
+      font-size: 13px;
+      color: var(--secondary);
+      line-height: 1.4;
+    }
+
+    .alert-badge {
+      display: inline-block;
+      background: var(--section-bg);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-top: 4px;
+      margin-right: 6px;
+    }
+
+    .alert-empty {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--secondary);
+      font-size: 14px;
+    }
+
+    /* KANBAN STYLES */
+    .kanban-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .kanban-column {
+      background: var(--hover);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 400px;
+    }
+
+    .kanban-header {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--separator);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kanban-count {
+      background: var(--section-bg);
+      border-radius: 10px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .kanban-card {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .kanban-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .kanban-card-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--fg);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .kanban-card-meta {
+      font-size: 12px;
+      color: var(--secondary);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .kanban-card-owner {
+      font-size: 11px;
+      background: var(--tag-bg);
+      border-radius: 3px;
+      padding: 2px 6px;
+      display: inline-block;
+      color: var(--secondary);
+      margin-top: 6px;
+    }
+
+    .kanban-card-date {
+      font-size: 11px;
+      color: var(--secondary);
+      margin-top: 4px;
+    }
+
+    .kanban-card.overdue .kanban-card-date {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .table-container {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .table-wrapper {
+      display: inline-block;
+      min-width: 100%;
+    }
+
+    .table-row {
+      display: grid;
+      gap: 0;
+      border-bottom: 1px solid var(--separator);
+      align-items: start;
+      position: relative;
+    }
+
+    .table-row.pipeline {
+      grid-template-columns: 1.2fr 1fr 0.75fr 1fr 1.2fr 2fr 2fr 1.5fr 40px;
+    }
+
+    .table-row.workstream {
+      grid-template-columns: 1.5fr 0.6fr 0.75fr 0.7fr 2.5fr 2fr 40px;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .table-row.header {
+      background: var(--hover);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--secondary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table-row:hover:not(.header) {
+      background: var(--hover);
+    }
+
+    .table-cell {
+      padding: 8px 12px;
+      border-right: 1px solid var(--separator);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: auto;
+    }
+
+    .table-cell:last-child {
+      border-right: none;
+    }
+
+    .table-row.header .table-cell {
+      padding: 8px 12px;
+    }
+
+    .editable-cell {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .editable-cell:hover {
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .editable-cell.editing {
+      background: rgba(0, 122, 255, 0.1);
+    }
+
+    .cell-input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--section-bg);
+      color: var(--fg);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 8px 12px;
+      line-height: 1.4;
+      resize: vertical;
+    }
+
+    .cell-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+    }
+
+    .cell-company {
+      font-weight: 600;
+      color: var(--fg);
+      font-size: 15px;
+    }
+
+    .cell-secondary {
+      font-size: 14px;
+      color: var(--secondary);
+    }
+
+    .cell-summary {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--fg);
+      overflow: visible;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .cell-action {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--secondary);
+      overflow: visible;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .industry-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .industry-tag.fleet {
+      background: rgba(0, 122, 255, 0.15);
+      color: #0066cc;
+    }
+
+    .industry-tag.pharma {
+      background: rgba(147, 51, 234, 0.15);
+      color: #7c3aed;
+    }
+
+    .industry-tag.ops {
+      background: rgba(34, 197, 94, 0.15);
+      color: #16a34a;
+    }
+
+    .btn-delete {
+      background: transparent;
+      color: var(--secondary);
+      border: none;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: auto;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .btn-delete:hover {
+      opacity: 0.8;
+      color: var(--danger);
+    }
+
+    .btn-add {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-add:hover {
+      opacity: 0.9;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .tasks-section {
+      margin-bottom: 24px;
+    }
+
+    .tasks-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--fg);
+    }
+
+    .tasks-table-header {
+      display: grid;
+      grid-template-columns: 30px 2.5fr 1.5fr 1fr 1.1fr 1.1fr 1.1fr 40px;
+      gap: 0;
+      background: var(--hover);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--secondary);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--separator);
+      margin-bottom: 0;
+    }
+
+    .tasks-table-header-cell {
+      padding: 12px 12px;
+      border-right: 1px solid var(--separator);
+    }
+
+    .tasks-table-header-cell:last-child {
+      border-right: none;
+    }
+
+    .task-item {
+      background: var(--section-bg);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--separator);
+      padding: 0;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 30px 2.5fr 1.5fr 1fr 1.1fr 1.1fr 1.1fr 40px;
+      gap: 0;
+      align-items: center;
+    }
+
+    .task-item:last-child {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task-item:hover {
+      background: var(--hover);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent);
+      margin: 0 auto;
+      flex-shrink: 0;
+      padding: 12px;
+    }
+
+    .task-cell {
+      padding: 8px 10px;
+      border-right: 1px solid var(--separator);
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      min-height: auto;
+    }
+
+    .task-cell:last-child {
+      border-right: none;
+    }
+
+    .task-text {
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.4;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .task-text:hover {
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--secondary);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--section-bg);
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Graffs Dashboard</h1>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div class="sync-status">
+          <div class="sync-indicator online"></div>
+          <span>Syncing</span>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">Theme</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('alerts')">Alerts</button>
+      <button class="tab" onclick="switchTab('overview')">Overview</button>
+      <button class="tab" onclick="switchTab('workstreams')">Workstreams</button>
+      <button class="tab" onclick="switchTab('tasks')">Tasks</button>
+      <button class="tab" onclick="switchTab('pipeline')">Sales Pipeline</button>
+    </div>
+
+    <!-- ALERTS TAB -->
+    <div id="alerts" class="tab-content active">
+      <div class="section">
+        <div class="section-title">Smart Alerts</div>
+        <div id="alertsContainer" style="margin-top: 16px;"></div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div id="overview" class="tab-content">
+      <div class="section">
+        <div class="section-title">Overview</div>
+        <div id="overviewContent" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;"></div>
+      </div>
+    </div>
+
+    <!-- WORKSTREAMS TAB -->
+    <div id="workstreams" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Workstreams</div>
+          <button class="btn-add" onclick="addWorkstream()">+ Add Workstream</button>
+        </div>
+        <div class="table-container" style="margin-top: 12px;">
+          <div class="table-wrapper">
+            <div class="table-row header workstream">
+              <div class="table-cell">Workstream</div>
+              <div class="table-cell">Industry</div>
+              <div class="table-cell">Status</div>
+              <div class="table-cell">Owner</div>
+              <div class="table-cell">Summary</div>
+              <div class="table-cell">Action Needed</div>
+              <div class="table-cell"></div>
+            </div>
+            <div id="workstreamsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS TAB -->
+    <div id="tasks" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Tasks</div>
+          <div class="view-toggle">
+            <button class="view-btn active" onclick="switchTaskView('list')">List</button>
+            <button class="view-btn" onclick="switchTaskView('kanban')">Board</button>
+          </div>
+        </div>
+        <div id="tasksListView" style="margin-top: 12px;">
+          <div class="table-container">
+            <div class="table-wrapper">
+              <div class="tasks-table-header">
+                <div class="tasks-table-header-cell">Done</div>
+                <div class="tasks-table-header-cell">Task</div>
+                <div class="tasks-table-header-cell">Workstream</div>
+                <div class="tasks-table-header-cell">Owner</div>
+                <div class="tasks-table-header-cell">Open Date</div>
+                <div class="tasks-table-header-cell">Target Date</div>
+                <div class="tasks-table-header-cell">Status</div>
+                <div class="tasks-table-header-cell"></div>
+              </div>
+              <div id="tasksList"></div>
+            </div>
+          </div>
+        </div>
+        <div id="tasksKanbanView" style="display: none; margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <!-- PIPELINE TAB -->
+    <div id="pipeline" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Sales Pipeline</div>
+          <div class="view-toggle">
+            <button class="view-btn active" onclick="switchPipelineView('list')">List</button>
+            <button class="view-btn" onclick="switchPipelineView('kanban')">Board</button>
+          </div>
+        </div>
+        <div id="pipelineListView" style="margin-top: 12px;">
+          <div class="table-container">
+            <div class="table-wrapper">
+              <div class="table-row header pipeline">
+                <div class="table-cell">Company</div>
+                <div class="table-cell">Industry</div>
+                <div class="table-cell">Status</div>
+                <div class="table-cell">Owner</div>
+                <div class="table-cell">Last Contact</div>
+                <div class="table-cell">Latest Update</div>
+                <div class="table-cell">Next Step</div>
+                <div class="table-cell">Notes</div>
+                <div class="table-cell"></div>
+              </div>
+              <div id="pipelineList"></div>
+            </div>
+          </div>
+        </div>
+        <div id="pipelineKanbanView" style="display: none; margin-top: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase config
+    const SUPABASE_URL = 'https://xnmrnqbsfadxrtlubrrd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_r9sOQ-xcEmGE_XyDkL5e9w_j9dM5kuF';
+
+    let dashboardData = {
+      workstreams: [],
+      tasks: [],
+      pipeline: []
+    };
+
+    class SupabaseClient {
+      constructor(url, key) {
+        this.url = url;
+        this.key = key;
+      }
+
+      async from(table) {
+        return {
+          select: async () => {
+            const res = await fetch(`${this.url}/rest/v1/${table}`, {
+              headers: { 'apikey': this.key }
+            });
+            return { data: await res.json(), error: null };
+          },
+          insert: async (records) => {
+            const res = await fetch(`${this.url}/rest/v1/${table}`, {
+              method: 'POST',
+              headers: { 'apikey': this.key, 'Content-Type': 'application/json' },
+              body: JSON.stringify(records)
+            });
+            return { data: await res.json(), error: null };
+          },
+          update: async (record) => {
+            const res = await fetch(`${this.url}/rest/v1/${table}?id=eq.${record.id}`, {
+              method: 'PATCH',
+              headers: { 'apikey': this.key, 'Content-Type': 'application/json' },
+              body: JSON.stringify(record)
+            });
+            return { data: await res.json(), error: null };
+          },
+          delete: async (id) => {
+            const res = await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
+              method: 'DELETE',
+              headers: { 'apikey': this.key }
+            });
+            return { data: null, error: null };
+          }
+        };
+      }
+    }
+
+    const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Load data on startup
+    async function loadDataFromSupabase() {
+      try {
+        console.log('Supabase client initialized');
+
+        const [workstreamsRes, tasksRes, pipelineRes] = await Promise.all([
+          supabase.from('workstreams').select(),
+          supabase.from('tasks').select(),
+          supabase.from('pipeline').select()
+        ]);
+
+        dashboardData.workstreams = workstreamsRes.data || [];
+        dashboardData.tasks = (tasksRes.data || []).filter(t => !t.completed);
+        dashboardData.pipeline = pipelineRes.data || [];
+
+        console.log('Loaded data from Supabase');
+        renderDashboard();
+      } catch (err) {
+        console.error('Error loading data:', err);
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+    }
+
+    function switchTaskView(view) {
+      document.getElementById('tasksListView').style.display = view === 'list' ? 'block' : 'none';
+      document.getElementById('tasksKanbanView').style.display = view === 'kanban' ? 'block' : 'none';
+      document.querySelectorAll('[onclick*="switchTaskView"]').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (view === 'kanban') renderTasksKanban();
+    }
+
+    function switchPipelineView(view) {
+      document.getElementById('pipelineListView').style.display = view === 'list' ? 'block' : 'none';
+      document.getElementById('pipelineKanbanView').style.display = view === 'kanban' ? 'block' : 'none';
+      document.querySelectorAll('[onclick*="switchPipelineView"]').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (view === 'kanban') renderPipelineKanban();
+    }
+
+    function renderDashboard() {
+      renderAlerts();
+      renderOverview();
+      renderWorkstreams();
+      renderTasks();
+      renderPipeline();
+    }
+
+    function renderAlerts() {
+      const alerts = generateSmartAlerts();
+      const container = document.getElementById('alertsContainer');
+
+      if (alerts.length === 0) {
+        container.innerHTML = '<div class="alert-empty">All clear! No alerts at this time.</div>';
+        return;
+      }
+
+      container.innerHTML = alerts.map(alert => `
+        <div class="alert-item ${alert.type}">
+          <div class="alert-content">
+            <div class="alert-title">${alert.title}</div>
+            <div class="alert-desc">${alert.description}</div>
+            <div><span class="alert-badge">${alert.badge}</span></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function generateSmartAlerts() {
+      const alerts = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Overdue tasks
+      dashboardData.tasks.forEach(task => {
+        const targetDate = new Date(task.targetDate);
+        if (targetDate < today && !task.completed) {
+          alerts.push({
+            type: 'overdue',
+            title: 'Overdue Task',
+            description: `"${task.text}" (${task.workstream}) - Owner: ${task.owner}`,
+            badge: `${Math.ceil((today - targetDate) / (1000 * 60 * 60 * 24))} days overdue`
+          });
+        }
+      });
+
+      // Upcoming tasks (next 7 days)
+      dashboardData.tasks.forEach(task => {
+        const targetDate = new Date(task.targetDate);
+        const daysUntil = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        if (daysUntil > 0 && daysUntil <= 7) {
+          alerts.push({
+            type: 'upcoming',
+            title: 'Upcoming Deadline',
+            description: `"${task.text}" due in ${daysUntil} ${daysUntil === 1 ? 'day' : 'days'}`,
+            badge: `${task.owner} - ${task.workstream}`
+          });
+        }
+      });
+
+      // Stale pipeline (30+ days since last contact)
+      dashboardData.pipeline.forEach(account => {
+        if (account.lastContact) {
+          const lastContact = new Date(account.lastContact);
+          const daysSince = Math.ceil((today - lastContact) / (1000 * 60 * 60 * 24));
+          if (daysSince >= 30) {
+            alerts.push({
+              type: 'stale',
+              title: 'Stale Contact',
+              description: `${account.company} (${account.industry}) - No contact for ${daysSince} days`,
+              badge: `Owner: ${account.owner}`
+            });
+          }
+        }
+      });
+
+      return alerts.sort((a, b) => {
+        const order = { overdue: 0, upcoming: 1, stale: 2 };
+        return order[a.type] - order[b.type];
+      });
+    }
+
+    function renderOverview() {
+      const stats = {
+        'Active Tasks': dashboardData.tasks.filter(t => !t.completed).length,
+        'Workstreams': dashboardData.workstreams.length,
+        'Pipeline Accounts': dashboardData.pipeline.length,
+        'Prospects': dashboardData.pipeline.filter(p => p.status === 'Prospect').length
+      };
+
+      document.getElementById('overviewContent').innerHTML = Object.entries(stats).map(([label, value]) => `
+        <div style="background: var(--section-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 4px;">${value}</div>
+          <div style="font-size: 13px; color: var(--secondary);">${label}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderWorkstreams() {
+      document.getElementById('workstreamsList').innerHTML = dashboardData.workstreams.map(ws => `
+        <div class="table-row workstream">
+          <div class="table-cell"><strong>${ws.name}</strong></div>
+          <div class="table-cell"><span class="industry-tag ${ws.industry.toLowerCase().replace(/\s/g, '-')}">${ws.industry}</span></div>
+          <div class="table-cell">${ws.status}</div>
+          <div class="table-cell">${ws.owner}</div>
+          <div class="table-cell">${ws.summary}</div>
+          <div class="table-cell">${ws.actionNeeded}</div>
+          <div class="table-cell"><button class="btn-delete" onclick="deleteWorkstream(${ws.id})">×</button></div>
+        </div>
+      `).join('');
+    }
+
+    function renderTasks() {
+      document.getElementById('tasksList').innerHTML = dashboardData.tasks.map((task, idx) => {
+        const isOverdue = new Date(task.targetDate) < new Date();
+        return `
+          <div class="task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
+            <div class="task-cell"><input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${idx})"></div>
+            <div class="task-cell"><span class="task-text">${task.text}</span></div>
+            <div class="task-cell">${task.workstream}</div>
+            <div class="task-cell">${task.owner}</div>
+            <div class="task-cell">${task.openDate}</div>
+            <div class="task-cell" style="color: ${isOverdue ? 'var(--danger)' : 'var(--fg)'}; font-weight: ${isOverdue ? '600' : '400'}">${task.targetDate}</div>
+            <div class="task-cell">${task.completed ? 'Done' : ''}</div>
+            <div class="task-cell"><button class="btn-delete" onclick="deleteTask(${idx})">×</button></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTasksKanban() {
+      const grouped = {};
+      dashboardData.tasks.forEach(task => {
+        if (!grouped[task.owner]) grouped[task.owner] = [];
+        grouped[task.owner].push(task);
+      });
+
+      const html = `
+        <div class="kanban-container">
+          ${Object.entries(grouped).map(([owner, tasks]) => `
+            <div class="kanban-column">
+              <div class="kanban-header">
+                ${owner}
+                <div class="kanban-count">${tasks.length}</div>
+              </div>
+              ${tasks.map(task => {
+                const isOverdue = new Date(task.targetDate) < new Date();
+                return `
+                  <div class="kanban-card ${isOverdue ? 'overdue' : ''}">
+                    <div class="kanban-card-title">${task.text}</div>
+                    <div class="kanban-card-meta">
+                      <span>${task.workstream}</span>
+                    </div>
+                    <div class="kanban-card-date">
+                      ${isOverdue ? 'OVERDUE' : `Due: ${task.targetDate}`}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('tasksKanbanView').innerHTML = html;
+    }
+
+    function renderPipeline() {
+      document.getElementById('pipelineList').innerHTML = dashboardData.pipeline.map((acc, idx) => `
+        <div class="table-row pipeline">
+          <div class="table-cell"><strong>${acc.company}</strong></div>
+          <div class="table-cell"><span class="industry-tag ${acc.industry.toLowerCase().replace(/\s/g, '-')}">${acc.industry}</span></div>
+          <div class="table-cell">${acc.status}</div>
+          <div class="table-cell">${acc.owner}</div>
+          <div class="table-cell">${acc.lastContact || '—'}</div>
+          <div class="table-cell">${acc.latestUpdate}</div>
+          <div class="table-cell">${acc.nextStep}</div>
+          <div class="table-cell">${acc.notes}</div>
+          <div class="table-cell"><button class="btn-delete" onclick="deletePipeline(${idx})">×</button></div>
+        </div>
+      `).join('');
+    }
+
+    function renderPipelineKanban() {
+      const statuses = ['Prospect', 'Scoping', 'On Hold', 'Active'];
+      const grouped = {};
+      statuses.forEach(status => {
+        grouped[status] = dashboardData.pipeline.filter(p => p.status === status);
+      });
+
+      const html = `
+        <div class="kanban-container">
+          ${Object.entries(grouped).map(([status, accounts]) => `
+            <div class="kanban-column">
+              <div class="kanban-header">
+                ${status}
+                <div class="kanban-count">${accounts.length}</div>
+              </div>
+              ${accounts.map(acc => {
+                const daysSinceContact = acc.lastContact ? Math.ceil((new Date() - new Date(acc.lastContact)) / (1000 * 60 * 60 * 24)) : null;
+                const isStale = daysSinceContact && daysSinceContact > 30;
+                return `
+                  <div class="kanban-card ${isStale ? 'overdue' : ''}">
+                    <div class="kanban-card-title">${acc.company}</div>
+                    <div class="kanban-card-meta">
+                      <span class="industry-tag ${acc.industry.toLowerCase().replace(/\s/g, '-')}">${acc.industry}</span>
+                    </div>
+                    <div class="kanban-card-owner">${acc.owner}</div>
+                    <div class="kanban-card-date">
+                      ${isStale ? `${daysSinceContact}d ago` : (acc.lastContact ? `Last: ${acc.lastContact}` : '—')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('pipelineKanbanView').innerHTML = html;
+    }
+
+    function toggleTask(idx) {
+      dashboardData.tasks[idx].completed = !dashboardData.tasks[idx].completed;
+      renderTasks();
+    }
+
+    function deleteTask(idx) {
+      dashboardData.tasks.splice(idx, 1);
+      renderTasks();
+    }
+
+    function deletePipeline(idx) {
+      dashboardData.pipeline.splice(idx, 1);
+      renderPipeline();
+    }
+
+    function deleteWorkstream(id) {
+      dashboardData.workstreams = dashboardData.workstreams.filter(ws => ws.id !== id);
+      renderWorkstreams();
+    }
+
+    function addWorkstream() {
+      const name = prompt('Workstream name:');
+      if (name) {
+        dashboardData.workstreams.push({
+          id: Date.now(),
+          name,
+          industry: 'FLEET',
+          status: 'Active',
+          owner: 'Hannah',
+          summary: '',
+          actionNeeded: ''
+        });
+        renderWorkstreams();
+      }
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Load theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    // Initialize on load
+    loadDataFromSupabase();
+  </script>
+</body>
+</html>
